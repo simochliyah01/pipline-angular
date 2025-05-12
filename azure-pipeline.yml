@@ -1,38 +1,44 @@
 trigger:
   branches:
     include:
-      - main  # Cette pipeline s'exécutera quand tu pousses sur la branche "main"
+      - main  # Cette pipeline va se déclencher à chaque push sur la branche 'main'
 
 pool:
-  vmImage: 'ubuntu-latest'  # L'environnement de build
+  vmImage: 'ubuntu-latest'  # Utilise une image Ubuntu pour les builds
 
-steps:
-# Étape 1: Installer Node.js (pour Angular)
-- task: UseNode@2
-  inputs:
-    versionSpec: '16.x'  # Version de Node.js pour Angular
-    addToPath: true
+variables:
+  tag: '$(Build.BuildId)'  # Utilise l'ID du build comme tag pour l'image Docker
 
-# Étape 2: Installer les dépendances du projet Angular
-- script: |
-    npm install
-  displayName: 'Install dependencies'
+stages:
+- stage: Build
+  displayName: 'Build Docker Image'
+  jobs:
+  - job: Build
+    displayName: 'Build Docker Image'
+    pool:
+      vmImage: 'ubuntu-latest'  # Utiliser Ubuntu comme environnement de build
+    steps:
+    # Étape 1: Installer Node.js
+    - task: UseNode@2
+      inputs:
+        versionSpec: '16.x'  # Utilise la version Node.js 16.x
+        addToPath: true
 
-# Étape 3: Build l'application Angular
-- script: |
-    npm run build --prod
-  displayName: 'Build Angular app'
+    # Étape 2: Installer les dépendances de l'application Angular
+    - script: |
+        npm install
+      displayName: 'Installer les dépendances'
 
-# Étape 4: Construire l'image Docker
-- task: Docker@2
-  inputs:
-    containerRegistry: '$(dockerRegistryServiceConnection)'  # Service connection Docker (Docker Hub ou Azure ACR)
-    repository: 'my-angular-app'  # Nom de l'image Docker
-    command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'  # Localisation de ton Dockerfile
-    tags: 'latest'
+    # Étape 3: Build l'application Angular
+    - script: |
+        npm run build --prod
+      displayName: 'Build l\'application Angular'
 
-# Optionnel : Tester le conteneur localement si nécessaire
-- script: |
-    docker run -d -p 8080:80 my-angular-app
-  displayName: 'Run Docker container'
+    # Étape 4: Construire et pousser l'image Docker
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'dockerHubConnection'  # Utiliser la connexion Docker que tu as créée
+        repository: 'my-angular-app'  # Nom du dépôt Docker (à ajuster selon ton projet)
+        command: 'buildAndPush'  # Build l'image et pousse-la vers le registre Docker
+        Dockerfile: '**/Dockerfile'  # Localisation du Dockerfile dans le projet
+        tags: '$(tag
