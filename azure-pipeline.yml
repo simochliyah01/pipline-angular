@@ -1,0 +1,38 @@
+trigger:
+  branches:
+    include:
+      - main  # Cette pipeline s'exécutera quand tu pousses sur la branche "main"
+
+pool:
+  vmImage: 'ubuntu-latest'  # L'environnement de build
+
+steps:
+# Étape 1: Installer Node.js (pour Angular)
+- task: UseNode@2
+  inputs:
+    versionSpec: '16.x'  # Version de Node.js pour Angular
+    addToPath: true
+
+# Étape 2: Installer les dépendances du projet Angular
+- script: |
+    npm install
+  displayName: 'Install dependencies'
+
+# Étape 3: Build l'application Angular
+- script: |
+    npm run build --prod
+  displayName: 'Build Angular app'
+
+# Étape 4: Construire l'image Docker
+- task: Docker@2
+  inputs:
+    containerRegistry: '$(dockerRegistryServiceConnection)'  # Service connection Docker (Docker Hub ou Azure ACR)
+    repository: 'my-angular-app'  # Nom de l'image Docker
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'  # Localisation de ton Dockerfile
+    tags: 'latest'
+
+# Optionnel : Tester le conteneur localement si nécessaire
+- script: |
+    docker run -d -p 8080:80 my-angular-app
+  displayName: 'Run Docker container'
