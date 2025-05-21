@@ -1,0 +1,57 @@
+name: Final-pip
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  angular-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name:  Lint check
+        run: npm run lint || true  # matdirch fail l CI ila lint ma success-sh
+
+      - name:  Audit vulnerabilities
+        run: npm audit --audit-level=moderate || true  # kayaffichi flaws, ma y9at3sh CI
+
+      - name:  Upgrade npm packages
+        run: npm update
+
+      - name:  Login f Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name:  Build w Push Angular Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            mohamedchliyah01/angular-app:latest
+            mohamedchliyah01/angular-app:${{ github.run_number }}
+
+      - name:  Discord Notification Success
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d "{\"content\": \"Angular CI Success: Build #${{ github.run_number }} daz mzyan!\"}" \
+            https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp
+
+      - name: Discord Notification Failure
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d "{\"content\": \"Angular CI Failed: Build #${{ github.run_number }} ga3 ma daz \"}" \
+            https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp
