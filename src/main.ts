@@ -3,4 +3,7 @@ import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+  .catch((err) => {
+    // handle error silently or with a custom logger
+    throw err;
+  });
