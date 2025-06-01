@@ -45,13 +45,13 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"Angular CI Success: Build #${{ github.run_number }} daz mzyan!\"}" \
-            https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp
+            -d "{\"content\": \"Angular CI Success: Build #${{ github.run_number }} Success\"}" \
+            https://discord.com/api/webhooks/1378739781596614666/qNSqpBzEzJNb961iEtziyqOhQ8Ny4VyDxCicrfXJWoIJXbEBRAq8Nq6Py-ad2W3g9umY
 
       - name: Discord Notification Failure
         if: failure()
         run: |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"Angular CI Failed: Build #${{ github.run_number }} ga3 ma daz \"}" \
-            https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp
+            -d "{\"content\": \"Angular CI Failed: Build #${{ github.run_number }} Failure \"}" \
+            https://discord.com/api/webhooks/1378739781596614666/qNSqpBzEzJNb961iEtziyqOhQ8Ny4VyDxCicrfXJWoIJXbEBRAq8Nq6Py-ad2W3g9umY
