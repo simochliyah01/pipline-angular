@@ -23,3 +23,9 @@ EXPOSE 80
 
 # Démarrer Nginx en mode démon
 CMD ["nginx", "-g", "daemon off;"]
+
+
+
+
+
+
